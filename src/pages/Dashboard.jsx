@@ -33,6 +33,10 @@ import {
   Cell
 } from 'recharts';
 
+const toArray = (value) => {
+  return Array.isArray(value) ? value : [];
+};
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -116,7 +120,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         <StatCard
           title="Total Vendors"
-          value={`${kpis?.averageVendorScore ?? 0} / 5`}
+          value={kpis?.totalVendors ?? 0}
           icon={<Users className="w-5 h-5" />}
           subtext="Onboarded suppliers"
           trend={`${kpis?.activeVendors ?? 0} Active`}
@@ -125,15 +129,15 @@ export default function Dashboard() {
         />
         <StatCard
           title="Average Score"
-          value={`${kpis.averageVendorScore} / 5`}
+          value={`${kpis?.averageVendorScore ?? 0} / 5`}
           icon={<TrendingUp className="w-5 h-5" />}
           subtext="SLV System Average"
-          trend={`${Math.round((kpis.averageVendorScore / 5) * 100)}% Rating`}
+          trend={`${Math.round(((kpis?.averageVendorScore ?? 0) / 5) * 100)}% Rating`}
           trendType="neutral"
         />
         <StatCard
           title="Warning / Risky"
-          value={kpis.warningVendors}
+          value={kpis?.warningVendors ?? 0}
           icon={<ShieldAlert className="w-5 h-5 text-orange-400" />}
           subtext="Need monitoring"
           trend="Action required"
@@ -154,13 +158,13 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <StatCard
           title="Rated Events"
-          value={kpis.totalEventsRated}
+          value={kpis?.totalEventsRated ?? 0}
           icon={<CalendarCheck className="w-5 h-5" />}
           subtext="Event histories completed"
         />
         <StatCard
           title="Pending Reviews"
-          value={kpis.pendingReviewsCount}
+          value={kpis?.pendingReviewsCount ?? 0}
           icon={<FileEdit className="w-5 h-5" />}
           subtext="Reviews awaiting detail"
           trend="Draft submissions"
@@ -193,7 +197,7 @@ export default function Dashboard() {
           </h3>
           <div className="flex-1 w-full h-full min-h-0">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={charts.monthlyRatingActivity}>
+              <AreaChart data={safeCharts.monthlyRatingActivity}>
                 <defs>
                   <linearGradient id="colorRatings" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#c084fc" stopOpacity={0.4} />
@@ -231,7 +235,7 @@ export default function Dashboard() {
                   paddingAngle={5}
                   dataKey="count"
                 >
-                  {charts.scoreDistribution.map((entry, index) => (
+                  {safeCharts.scoreDistribution.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -243,7 +247,7 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </div>
           <div className="grid grid-cols-2 gap-2 mt-2 text-[10px] text-gray-400 font-semibold">
-            {charts.scoreDistribution.map((entry, idx) => (
+            {safeCharts.scoreDistribution.map((entry, idx) => (
               <div key={entry.name} className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[idx] }} />
                 <span className="truncate">{entry.name} ({entry.count})</span>
@@ -260,7 +264,7 @@ export default function Dashboard() {
           </h3>
           <div className="flex-1 w-full h-full min-h-0">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={charts.categoryPerformance}>
+              <BarChart data={safeCharts.categoryPerformance}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                 <XAxis dataKey="category" stroke="rgba(255,255,255,0.4)" fontSize={11} />
                 <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} domain={[0, 5]} />
@@ -269,7 +273,7 @@ export default function Dashboard() {
                   labelStyle={{ color: '#ffffff', fontWeight: 'bold' }}
                 />
                 <Bar dataKey="averageScore" fill="#a78bfa" radius={[4, 4, 0, 0]}>
-                  {charts.categoryPerformance.map((entry, index) => (
+                  {safeCharts.categoryPerformance.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.averageScore >= 4.0 ? '#22c55e' : entry.averageScore >= 3.2 ? '#c084fc' : entry.averageScore >= 2.5 ? '#f97316' : '#ef4444'} />
                   ))}
                 </Bar>
@@ -342,7 +346,7 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {atRisk.length === 0 ? (
+                {safeAtRisk.length === 0 ? (
                   <tr>
                     <td colSpan="3" className="py-4 text-center text-xs text-gray-500 font-semibold uppercase">
                       No vendors currently flagged at risk.
@@ -444,7 +448,7 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {latestAlerts.length === 0 ? (
+                {safeLatestAlerts.length === 0 ? (
                   <tr>
                     <td colSpan="5" className="py-4 text-center text-xs text-gray-500 font-semibold uppercase">
                       No status alerts logged. All vendors stable.
@@ -482,3 +486,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
+
