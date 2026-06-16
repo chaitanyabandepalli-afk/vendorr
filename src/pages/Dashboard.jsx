@@ -1,32 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  dashboardService 
+import {
+  dashboardService
 } from '../services/api.js';
 import StatCard from '../components/StatCard.jsx';
 import ScoreBadge from '../components/ScoreBadge.jsx';
 import StatusBadge from '../components/StatusBadge.jsx';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
-import { 
-  Users, 
-  ShieldAlert, 
-  Sparkles, 
-  CalendarCheck, 
-  FileEdit, 
-  TrendingUp, 
+import {
+  Users,
+  ShieldAlert,
+  Sparkles,
+  CalendarCheck,
+  FileEdit,
+  TrendingUp,
   ArrowUpRight,
   Clock,
   UserCheck
 } from 'lucide-react';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer, 
-  AreaChart, 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  AreaChart,
   Area,
   PieChart,
   Pie,
@@ -60,8 +60,30 @@ export default function Dashboard() {
   if (error) return <div className="p-8 text-center text-red-400 font-semibold">{error}</div>;
   if (!data) return null;
 
-  const { kpis, charts, topPerforming, atRisk, recentlyRated, latestAlerts } = data;
+  const defaultKpis = {
+    totalVendors: 0,
+    activeVendors: 0,
+    warningVendors: 0,
+    blacklistedVendors: 0,
+    averageVendorScore: 0,
+    totalEventsRated: 0,
+    pendingReviewsCount: 0,
+  };
 
+  const defaultCharts = {
+    scoreDistribution: [],
+    categoryPerformance: [],
+    monthlyRatingActivity: [],
+  };
+
+  const {
+    kpis = defaultKpis,
+    charts = defaultCharts,
+    topPerforming = [],
+    atRisk = [],
+    recentlyRated = [],
+    latestAlerts = [],
+  } = data || {};
   const COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e'];
 
   const formatDate = (dateStr) => {
@@ -71,15 +93,15 @@ export default function Dashboard() {
 
   return (
     <div className="p-8 space-y-8 animate-fade-in max-w-7xl mx-auto">
-      
+
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         <StatCard
           title="Total Vendors"
-          value={kpis.totalVendors}
+          value={`${kpis?.averageVendorScore ?? 0} / 5`}
           icon={<Users className="w-5 h-5" />}
           subtext="Onboarded suppliers"
-          trend={`${kpis.activeVendors} Active`}
+          trend={`${kpis?.activeVendors ?? 0} Active`}
           trendType="up"
           onClick={() => navigate('/vendors')}
         />
@@ -130,7 +152,7 @@ export default function Dashboard() {
           <div>
             <h4 className="text-sm font-bold text-white uppercase tracking-wider">Need Recommendations?</h4>
             <p className="text-xs text-gray-400 mt-1">Match high-quality vendors to new event types instantly.</p>
-            <button 
+            <button
               onClick={() => navigate('/recommendations')}
               className="mt-3 flex items-center gap-1 text-xs font-bold text-purple-300 hover:text-white transition-colors"
             >
@@ -144,7 +166,7 @@ export default function Dashboard() {
 
       {/* Analytics Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Monthly Rating Activity (2/3 width) */}
         <div className="glass-panel p-6 rounded-xl lg:col-span-2 flex flex-col h-80">
           <h3 className="text-md font-bold mb-4 flex items-center gap-2">
@@ -156,14 +178,14 @@ export default function Dashboard() {
               <AreaChart data={charts.monthlyRatingActivity}>
                 <defs>
                   <linearGradient id="colorRatings" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#c084fc" stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor="#c084fc" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#c084fc" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#c084fc" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                 <XAxis dataKey="month" stroke="rgba(255,255,255,0.4)" fontSize={11} />
                 <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} allowDecimals={false} />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{ backgroundColor: 'rgba(15, 16, 26, 0.95)', borderColor: 'rgba(255,255,255,0.1)' }}
                   labelStyle={{ color: '#ffffff', fontWeight: 'bold' }}
                 />
@@ -195,7 +217,7 @@ export default function Dashboard() {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip 
+                <Tooltip
                   contentStyle={{ backgroundColor: 'rgba(15, 16, 26, 0.95)', borderColor: 'rgba(255,255,255,0.1)' }}
                   itemStyle={{ color: '#fff' }}
                 />
@@ -224,7 +246,7 @@ export default function Dashboard() {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                 <XAxis dataKey="category" stroke="rgba(255,255,255,0.4)" fontSize={11} />
                 <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} domain={[0, 5]} />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{ backgroundColor: 'rgba(15, 16, 26, 0.95)', borderColor: 'rgba(255,255,255,0.1)' }}
                   labelStyle={{ color: '#ffffff', fontWeight: 'bold' }}
                 />
@@ -241,7 +263,7 @@ export default function Dashboard() {
 
       {/* Side-by-side Tables Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
+
         {/* Top Performing Vendors */}
         <div className="glass-panel p-6 rounded-xl flex flex-col">
           <h3 className="text-md font-bold text-white mb-4 flex items-center justify-between">
@@ -264,8 +286,8 @@ export default function Dashboard() {
               </thead>
               <tbody>
                 {topPerforming.map(v => (
-                  <tr 
-                    key={v.id} 
+                  <tr
+                    key={v.id}
                     onClick={() => navigate(`/vendors/${v.id}`)}
                     className="border-b border-white/5 hover:bg-white/5 cursor-pointer text-sm font-medium transition-colors"
                   >
@@ -310,8 +332,8 @@ export default function Dashboard() {
                   </tr>
                 ) : (
                   atRisk.map(v => (
-                    <tr 
-                      key={v.id} 
+                    <tr
+                      key={v.id}
                       onClick={() => navigate(`/vendors/${v.id}`)}
                       className="border-b border-white/5 hover:bg-white/5 cursor-pointer text-sm font-medium transition-colors"
                     >
