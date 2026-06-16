@@ -84,6 +84,24 @@ export default function Dashboard() {
     recentlyRated = [],
     latestAlerts = [],
   } = data || {};
+
+  const safeCharts = {
+    scoreDistribution: Array.isArray(charts?.scoreDistribution)
+      ? charts.scoreDistribution
+      : [],
+    categoryPerformance: Array.isArray(charts?.categoryPerformance)
+      ? charts.categoryPerformance
+      : [],
+    monthlyRatingActivity: Array.isArray(charts?.monthlyRatingActivity)
+      ? charts.monthlyRatingActivity
+      : [],
+  };
+
+  const safeTopPerforming = Array.isArray(topPerforming) ? topPerforming : [];
+  const safeAtRisk = Array.isArray(atRisk) ? atRisk : [];
+  const safeRecentlyRated = Array.isArray(recentlyRated) ? recentlyRated : [];
+  const safeLatestAlerts = Array.isArray(latestAlerts) ? latestAlerts : [];
+
   const COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e'];
 
   const formatDate = (dateStr) => {
@@ -205,7 +223,7 @@ export default function Dashboard() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={charts.scoreDistribution}
+                  data={safeCharts.scoreDistribution}
                   cx="50%"
                   cy="50%"
                   innerRadius={50}
@@ -285,7 +303,7 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {topPerforming.map(v => (
+                {safeTopPerforming.map(v => (
                   <tr
                     key={v.id}
                     onClick={() => navigate(`/vendors/${v.id}`)}
@@ -331,7 +349,7 @@ export default function Dashboard() {
                     </td>
                   </tr>
                 ) : (
-                  atRisk.map(v => (
+                  safeAtRisk.map(v => (
                     <tr
                       key={v.id}
                       onClick={() => navigate(`/vendors/${v.id}`)}
@@ -374,7 +392,7 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {recentlyRated.map(r => (
+                {safeRecentlyRated.map(r => (
                   <tr key={r.id} className="border-b border-white/5 hover:bg-white/5 transition-colors text-sm">
                     <td className="py-3">
                       <div className="flex flex-col">
@@ -433,7 +451,7 @@ export default function Dashboard() {
                     </td>
                   </tr>
                 ) : (
-                  latestAlerts.map(alert => (
+                  safeLatestAlerts.map(alert => (
                     <tr key={alert.id} className="border-b border-white/5 hover:bg-white/5 transition-colors text-sm">
                       <td className="py-3">
                         <div className="flex flex-col">
